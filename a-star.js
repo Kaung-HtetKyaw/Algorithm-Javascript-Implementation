@@ -2,17 +2,18 @@
 let input = [
   [1, 1, 1, 1, 0],
   [1, 0, 1, 0, 1],
-  [1, 0, 0, 1, 1],
+  [1, 1, 1, 1, 1],
   [1, 1, 1, 1, 1],
   [0, 1, 1, 0, 1],
 ];
-let start = { x: 0, y: 0 };
+let start = { x: 1, y: 2 };
 let end = { x: 4, y: 4 };
 
-// dijkstra idea is basically the same as breadth-first-search
-// except dijkstra includes priority queue, queued by the distance from the start node to current node in ascending order
+// a-start idea is basically the same as dijkstra
+// except a-star is queued by,
+// heuristics to end node from current node + distacne from start to current node
 
-function dijkstra(inputGrid, start, end) {
+function a_star(inputGrid, start, end, heuristics = manhattan_h) {
   let grid = normalizeGrid(inputGrid);
   let startNode = grid[start.x][start.y];
   let openList = { [startNode.name]: startNode };
@@ -32,6 +33,7 @@ function dijkstra(inputGrid, start, end) {
     // get neighbour nodes
     let neighbours = getNeighbourNodes(grid, currentNode);
     let neighboursLength = neighbours.length;
+    console.log("current: ", { x: currentNode.x, y: currentNode.y });
     for (let x = 0; x < neighboursLength; x++) {
       let neighbour = neighbours[x];
 
@@ -45,6 +47,7 @@ function dijkstra(inputGrid, start, end) {
       if (!neighbour.visited) {
         isBestG = true;
         neighbour.visited = true;
+        neighbour.h = heuristics(neighbour, end);
         openList[neighbour.name] = neighbour;
       } else if (neighbour.g > currentG) {
         // if visited and previous g is larger then the current one, current one will be the bset
@@ -54,11 +57,25 @@ function dijkstra(inputGrid, start, end) {
       if (isBestG) {
         neighbour.parent = { x: currentNode.x, y: currentNode.y };
         neighbour.g = currentG;
+        neighbour.f = neighbour.g + neighbour.h;
       }
+      console.log({
+        x: neighbour.x,
+        y: neighbour.y,
+        h: neighbour.h,
+        f: neighbour.f,
+      });
     }
   }
   // return empty array if there is no path
   return [];
+}
+
+function manhattan_h(node, end) {
+  let D = 1;
+  let d1 = Math.abs(node.x - end.x);
+  let d2 = Math.abs(node.y - end.y);
+  return D * (d1 + d2);
 }
 
 function getFinalPath(node, grid, start) {
@@ -103,7 +120,7 @@ function getShortestNode(openList) {
   let shortest = null;
   for (let node in openList) {
     let isCurrentShortest =
-      shortest === null || openList[node].g < openList[shortest].g;
+      shortest === null || openList[node].f < openList[shortest].f;
     if (isCurrentShortest) {
       shortest = node;
     }
@@ -134,7 +151,9 @@ function normalizeNode(inputGrid, x, y) {
     value: inputGrid[x][y],
     isWall: inputGrid[x][y] === 0,
     parent: null,
+    f: 0,
     g: 0,
+    h: 0,
     name: `${x}${y}`,
   };
 }
