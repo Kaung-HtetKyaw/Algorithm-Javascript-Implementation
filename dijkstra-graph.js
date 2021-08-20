@@ -81,23 +81,19 @@ function getNeighbourNodes(grid, currentNode) {
   let result = [];
   // get valid non-wall nodes
 
-  if (grid[x - 1] && grid[x - 1][y] && !isWall(grid[x - 1][y])) {
+  if (grid[x - 1] && grid[x - 1][y] && !grid[x - 1][y].isWall) {
     result.push(grid[x - 1][y]);
   }
-  if (grid[x + 1] && grid[x + 1][y] && !isWall(grid[x + 1][y])) {
+  if (grid[x + 1] && grid[x + 1][y] && !grid[x + 1][y].isWall) {
     result.push(grid[x + 1][y]);
   }
-  if (grid[x][y - 1] && grid[x][y - 1] && !isWall(grid[x][y - 1])) {
+  if (grid[x][y - 1] && grid[x][y - 1] && !grid[x][y - 1].isWall) {
     result.push(grid[x][y - 1]);
   }
-  if (grid[x][y + 1] && grid[x][y + 1] && !isWall(grid[x][y + 1])) {
+  if (grid[x][y + 1] && grid[x][y + 1] && !grid[x][y + 1].isWall) {
     result.push(grid[x][y + 1]);
   }
   return result;
-}
-
-function isWall(node) {
-  return node.value === 0;
 }
 
 function getShortestNode(openList) {
