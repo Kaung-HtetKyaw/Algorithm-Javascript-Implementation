@@ -1,3 +1,9 @@
+const {
+  normalizeGrid,
+  getFinalPath,
+  isEnd,
+  getNeighbourNodes,
+} = require("./utils");
 // for different movement costs
 // eg. climbing a hill has higher cost than walking at downtown
 // 0 means obstacle, positive no. n means open and has cost of n
@@ -26,21 +32,20 @@ let end = { x: 4, y: 4 };
 // ! but it may not find the shortest path sometime, instead of gbfs, use A* with unadmissible heurisitcs
 // * read more https://www.redblobgames.com/pathfinding/a-star/introduction.html
 
-function greedy_best_first_search(
-  inputGrid,
-  start,
-  end,
-  heuristics = manhattan_h
-) {
-  let grid = normalizeGrid(inputGrid);
+let inputGrid = normalizeGrid(input_uniform);
+
+function greedy_best_first_search(grid, start, end, heuristics = manhattan_h) {
   let startNode = grid[start.x][start.y];
   let openList = { [startNode.name]: startNode };
+  let numNodes = 0; // num of nodes considered, not really important (for extra information)
 
   while (Object.keys(openList).length > 0) {
     // get the shortest node from open list
     let currentNode = getShortestNode(openList);
+    numNodes++;
     // if reach end
     if (isEnd(currentNode, end)) {
+      console.log("Number of nodes considered: ", numNodes);
       return getFinalPath(currentNode, grid, start);
     }
 
@@ -51,10 +56,9 @@ function greedy_best_first_search(
     // get neighbour nodes
     let neighbours = getNeighbourNodes(grid, currentNode);
     let neighboursLength = neighbours.length;
-    console.log("current: ", { x: currentNode.x, y: currentNode.y });
+
     for (let x = 0; x < neighboursLength; x++) {
       let neighbour = neighbours[x];
-
       // continue to next neighbour if closed or wall
       if (neighbour.closed || neighbour.isWall) {
         continue;
@@ -75,11 +79,6 @@ function greedy_best_first_search(
         neighbour.parent = { x: currentNode.x, y: currentNode.y };
         neighbour.h = currentH;
       }
-      console.log({
-        x: neighbour.x,
-        y: neighbour.y,
-        h: neighbour.h,
-      });
     }
   }
   // return empty array if there is no path
@@ -91,44 +90,6 @@ function manhattan_h(node, end) {
   let d1 = Math.abs(node.x - end.x);
   let d2 = Math.abs(node.y - end.y);
   return D * (d1 + d2);
-}
-
-function getFinalPath(node, grid, start) {
-  let result = [];
-  let cur = node;
-  while (cur.parent) {
-    result.push(cur);
-    let { x, y } = cur.parent;
-    cur = grid[x][y];
-  }
-  result.push(grid[start.x][start.y]);
-  return result.reverse();
-}
-
-function isEnd(currentNode, end) {
-  let { x: curX, y: curY } = currentNode;
-  let { x, y } = end;
-  return curX === x && curY === y;
-}
-
-function getNeighbourNodes(grid, currentNode) {
-  let { x, y } = currentNode;
-  let result = [];
-  // get valid non-wall nodes
-
-  if (grid[x - 1] && grid[x - 1][y] && !grid[x - 1][y].isWall) {
-    result.push(grid[x - 1][y]);
-  }
-  if (grid[x + 1] && grid[x + 1][y] && !grid[x + 1][y].isWall) {
-    result.push(grid[x + 1][y]);
-  }
-  if (grid[x][y - 1] && grid[x][y - 1] && !grid[x][y - 1].isWall) {
-    result.push(grid[x][y - 1]);
-  }
-  if (grid[x][y + 1] && grid[x][y + 1] && !grid[x][y + 1].isWall) {
-    result.push(grid[x][y + 1]);
-  }
-  return result;
 }
 
 function getShortestNode(openList) {
@@ -143,30 +104,9 @@ function getShortestNode(openList) {
   return openList[shortest];
 }
 
-function normalizeGrid(inputGrid) {
-  let outerArr = [];
-  let length = inputGrid.length;
-  for (let x = 0; x < length; x++) {
-    let xLength = inputGrid[x].length;
-    let innerArr = [];
-    for (let y = 0; y < xLength; y++) {
-      innerArr.push(normalizeNode(inputGrid, x, y));
-    }
-    outerArr.push(innerArr);
-  }
-  return outerArr;
-}
+let result = greedy_best_first_search(inputGrid, start, end);
 
-function normalizeNode(inputGrid, x, y) {
-  return {
-    x,
-    y,
-    visited: false,
-    closed: false,
-    value: inputGrid[x][y],
-    isWall: inputGrid[x][y] === 0,
-    parent: null,
-    g: 0,
-    name: `${x}${y}`,
-  };
-}
+console.log(
+  "nodes: ",
+  result.map((el) => el.name)
+);

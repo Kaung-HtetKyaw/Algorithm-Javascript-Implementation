@@ -1,19 +1,17 @@
+const {
+  getNeighbourNodes,
+  normalizeGrid,
+  getFinalPath,
+  isEnd,
+} = require("./utils");
 // for different movement costs
 // eg. climbing a hill has higher cost than walking at downtown
 // 0 means obstacle, positive no. n means open and has cost of n
-let input = [
-  [1, 3, 2, 1, 0],
-  [1, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1],
-  [1, 1, 1, 5, 1],
-  [0, 1, 1, 0, 1],
-];
 
-// for uniform movement costs
-let input_uniform = [
+let input = [
   [1, 1, 1, 1, 0],
   [1, 0, 1, 0, 1],
-  [1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 1],
   [1, 1, 1, 1, 1],
   [0, 1, 1, 0, 1],
 ];
@@ -21,20 +19,24 @@ let input_uniform = [
 let start = { x: 0, y: 0 };
 let end = { x: 4, y: 4 };
 
+let inputGrid = normalizeGrid(input, true);
+
 // a-start idea is basically the same as dijkstra
 // except a-star is queued by,
 // heuristics to end node from current node + distacne from start to current node
 
-function a_star(inputGrid, start, end, heuristics = manhattan_h) {
-  let grid = normalizeGrid(inputGrid);
+function a_star(grid, start, end, heuristics = manhattan_h) {
   let startNode = grid[start.x][start.y];
   let openList = { [startNode.name]: startNode };
+  let numNodes = 0; // num of nodes considered, not really important (for extra information)
 
   while (Object.keys(openList).length > 0) {
     // get the shortest node from open list
     let currentNode = getShortestNode(openList);
+    numNodes++;
     // if reach end
     if (isEnd(currentNode, end)) {
+      console.log("Number of nodes considered: ", numNodes);
       return getFinalPath(currentNode, grid, start);
     }
 
@@ -53,7 +55,8 @@ function a_star(inputGrid, start, end, heuristics = manhattan_h) {
       if (neighbour.closed || neighbour.isWall) {
         continue;
       }
-      let currentG = currentNode.g + neighbour.value;
+      // cur to neighbour cost from start node
+      let currentG = currentNode.g + currentNode.weights[neighbour.name];
       let isBestG = false;
       // for first time visiting, there is no previous g so current g will be the best
       if (!neighbour.visited) {
@@ -71,15 +74,9 @@ function a_star(inputGrid, start, end, heuristics = manhattan_h) {
         neighbour.g = currentG;
         neighbour.f = neighbour.g + neighbour.h;
       }
-      // console.log({
-      //   x: neighbour.x,
-      //   y: neighbour.y,
-      //   h: neighbour.h,
-      //   f: neighbour.f,
-      //   g: neighbour.g,
-      // });
     }
   }
+
   // return empty array if there is no path
   return [];
 }
@@ -89,44 +86,6 @@ function manhattan_h(node, end) {
   let d1 = Math.abs(node.x - end.x);
   let d2 = Math.abs(node.y - end.y);
   return D * (d1 + d2);
-}
-
-function getFinalPath(node, grid, start) {
-  let result = [];
-  let cur = node;
-  while (cur.parent) {
-    result.push(cur);
-    let { x, y } = cur.parent;
-    cur = grid[x][y];
-  }
-  result.push(grid[start.x][start.y]);
-  return result.reverse();
-}
-
-function isEnd(currentNode, end) {
-  let { x: curX, y: curY } = currentNode;
-  let { x, y } = end;
-  return curX === x && curY === y;
-}
-
-function getNeighbourNodes(grid, currentNode) {
-  let { x, y } = currentNode;
-  let result = [];
-  // get valid non-wall nodes
-
-  if (grid[x - 1] && grid[x - 1][y] && !grid[x - 1][y].isWall) {
-    result.push(grid[x - 1][y]);
-  }
-  if (grid[x + 1] && grid[x + 1][y] && !grid[x + 1][y].isWall) {
-    result.push(grid[x + 1][y]);
-  }
-  if (grid[x][y - 1] && grid[x][y - 1] && !grid[x][y - 1].isWall) {
-    result.push(grid[x][y - 1]);
-  }
-  if (grid[x][y + 1] && grid[x][y + 1] && !grid[x][y + 1].isWall) {
-    result.push(grid[x][y + 1]);
-  }
-  return result;
 }
 
 function getShortestNode(openList) {
@@ -141,32 +100,11 @@ function getShortestNode(openList) {
   return openList[shortest];
 }
 
-function normalizeGrid(inputGrid) {
-  let outerArr = [];
-  let length = inputGrid.length;
-  for (let x = 0; x < length; x++) {
-    let xLength = inputGrid[x].length;
-    let innerArr = [];
-    for (let y = 0; y < xLength; y++) {
-      innerArr.push(normalizeNode(inputGrid, x, y));
-    }
-    outerArr.push(innerArr);
-  }
-  return outerArr;
-}
-
-function normalizeNode(inputGrid, x, y) {
-  return {
-    x,
-    y,
-    visited: false,
-    closed: false,
-    value: inputGrid[x][y],
-    isWall: inputGrid[x][y] === 0,
-    parent: null,
-    f: 0,
-    g: 0,
-    h: 0,
-    name: `${x}${y}`,
-  };
-}
+// let result = a_star(inputGrid, start, end);
+// console.log("Hello");
+// console.log("***********");
+// console.log("total costs: ", result[result.length - 1].g);
+// console.log(
+//   "nodes: ",
+//   result.map((el) => el.name)
+// );

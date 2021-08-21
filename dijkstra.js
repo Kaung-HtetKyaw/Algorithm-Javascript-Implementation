@@ -1,19 +1,17 @@
+const {
+  getNeighbourNodes,
+  normalizeGrid,
+  getFinalPath,
+  isEnd,
+} = require("./utils");
 // for different movement costs
 // eg. climbing a hill has higher cost than walking at downtown
 // 0 means obstacle, positive no. n means open and has cost of n
-let input = [
-  [1, 3, 2, 1, 0],
-  [1, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1],
-  [1, 1, 1, 5, 1],
-  [0, 1, 1, 0, 1],
-];
-
 // for uniform movement costs
 let input_uniform = [
   [1, 1, 1, 1, 0],
   [1, 0, 1, 0, 1],
-  [1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 1],
   [1, 1, 1, 1, 1],
   [0, 1, 1, 0, 1],
 ];
@@ -24,16 +22,21 @@ let end = { x: 4, y: 4 };
 // dijkstra idea is basically the same as breadth-first-search
 // except dijkstra includes priority queue, queued by the distance from the start node to current node in ascending order
 
-function dijkstra(inputGrid, start, end) {
-  let grid = normalizeGrid(inputGrid);
+// dijkstra uniform movement costs
+let inputGrid = normalizeGrid(input_uniform, true);
+
+function dijkstra(grid, start, end) {
   let startNode = grid[start.x][start.y];
   let openList = { [startNode.name]: startNode };
+  let numNodes = 0; // num of nodes considered, not really important (for extra information)
 
   while (Object.keys(openList).length > 0) {
     // get the shortest node from open list
     let currentNode = getShortestNode(openList);
+    numNodes++;
     // if reach end
     if (isEnd(currentNode, end)) {
+      console.log("Number of nodes considered: ", numNodes);
       return getFinalPath(currentNode, grid, start);
     }
 
@@ -44,7 +47,7 @@ function dijkstra(inputGrid, start, end) {
     // get neighbour nodes
     let neighbours = getNeighbourNodes(grid, currentNode);
     let neighboursLength = neighbours.length;
-    // console.log("current: ", { x: currentNode.x, y: currentNode.y });
+
     for (let x = 0; x < neighboursLength; x++) {
       let neighbour = neighbours[x];
 
@@ -52,7 +55,7 @@ function dijkstra(inputGrid, start, end) {
       if (neighbour.closed || neighbour.isWall) {
         continue;
       }
-      let currentG = currentNode.g + neighbour.value;
+      let currentG = currentNode.g + currentNode.weights[neighbour.name];
       let isBestG = false;
       // for first time visiting, there is no previous g so current g will be the best
       if (!neighbour.visited) {
@@ -75,46 +78,9 @@ function dijkstra(inputGrid, start, end) {
       // });
     }
   }
+
   // return empty array if there is no path
   return [];
-}
-
-function getFinalPath(node, grid, start) {
-  let result = [];
-  let cur = node;
-  while (cur.parent) {
-    result.push(cur);
-    let { x, y } = cur.parent;
-    cur = grid[x][y];
-  }
-  result.push(grid[start.x][start.y]);
-  return result.reverse();
-}
-
-function isEnd(currentNode, end) {
-  let { x: curX, y: curY } = currentNode;
-  let { x, y } = end;
-  return curX === x && curY === y;
-}
-
-function getNeighbourNodes(grid, currentNode) {
-  let { x, y } = currentNode;
-  let result = [];
-  // get valid non-wall nodes
-
-  if (grid[x - 1] && grid[x - 1][y] && !grid[x - 1][y].isWall) {
-    result.push(grid[x - 1][y]);
-  }
-  if (grid[x + 1] && grid[x + 1][y] && !grid[x + 1][y].isWall) {
-    result.push(grid[x + 1][y]);
-  }
-  if (grid[x][y - 1] && grid[x][y - 1] && !grid[x][y - 1].isWall) {
-    result.push(grid[x][y - 1]);
-  }
-  if (grid[x][y + 1] && grid[x][y + 1] && !grid[x][y + 1].isWall) {
-    result.push(grid[x][y + 1]);
-  }
-  return result;
 }
 
 function getShortestNode(openList) {
@@ -129,30 +95,9 @@ function getShortestNode(openList) {
   return openList[shortest];
 }
 
-function normalizeGrid(inputGrid) {
-  let outerArr = [];
-  let length = inputGrid.length;
-  for (let x = 0; x < length; x++) {
-    let xLength = inputGrid[x].length;
-    let innerArr = [];
-    for (let y = 0; y < xLength; y++) {
-      innerArr.push(normalizeNode(inputGrid, x, y));
-    }
-    outerArr.push(innerArr);
-  }
-  return outerArr;
-}
-
-function normalizeNode(inputGrid, x, y) {
-  return {
-    x,
-    y,
-    visited: false,
-    closed: false,
-    value: inputGrid[x][y],
-    isWall: inputGrid[x][y] === 0,
-    parent: null,
-    g: 0,
-    name: `${x}${y}`,
-  };
-}
+// let result = dijkstra(inputGrid, start, end);
+// console.log("total costs: ", result[result.length - 1].g);
+// console.log(
+//   "nodes: ",
+//   result.map((el) => el.name)
+// );
