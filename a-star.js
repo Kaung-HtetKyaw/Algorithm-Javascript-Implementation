@@ -2,14 +2,14 @@
 // eg. climbing a hill has higher cost than walking at downtown
 // 0 means obstacle, positive no. n means open and has cost of n
 let input = [
-  [1, 3, 1, 1, 0],
+  [1, 3, 2, 1, 0],
   [1, 0, 1, 0, 1],
   [1, 0, 1, 1, 1],
   [1, 1, 1, 5, 1],
   [0, 1, 1, 0, 1],
 ];
 
-// for same movement costs
+// for uniform movement costs
 let input_uniform = [
   [1, 1, 1, 1, 0],
   [1, 0, 1, 0, 1],
@@ -45,7 +45,7 @@ function a_star(inputGrid, start, end, heuristics = manhattan_h) {
     // get neighbour nodes
     let neighbours = getNeighbourNodes(grid, currentNode);
     let neighboursLength = neighbours.length;
-    console.log("current: ", { x: currentNode.x, y: currentNode.y });
+    // console.log("current: ", { x: currentNode.x, y: currentNode.y });
     for (let x = 0; x < neighboursLength; x++) {
       let neighbour = neighbours[x];
 
@@ -71,12 +71,13 @@ function a_star(inputGrid, start, end, heuristics = manhattan_h) {
         neighbour.g = currentG;
         neighbour.f = neighbour.g + neighbour.h;
       }
-      console.log({
-        x: neighbour.x,
-        y: neighbour.y,
-        h: neighbour.h,
-        f: neighbour.f,
-      });
+      // console.log({
+      //   x: neighbour.x,
+      //   y: neighbour.y,
+      //   h: neighbour.h,
+      //   f: neighbour.f,
+      //   g: neighbour.g,
+      // });
     }
   }
   // return empty array if there is no path

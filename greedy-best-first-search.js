@@ -21,10 +21,17 @@ let input_uniform = [
 let start = { x: 0, y: 0 };
 let end = { x: 4, y: 4 };
 
-// dijkstra idea is basically the same as breadth-first-search
-// except dijkstra includes priority queue, queued by the distance from the start node to current node in ascending order
+//  idea is basically the same as dijkstra
+// except queued by the estimate distance to goal in ascending order
+// ! but it may not find the shortest path sometime, instead of gbfs, use A* with unadmissible heurisitcs
+// * read more https://www.redblobgames.com/pathfinding/a-star/introduction.html
 
-function dijkstra(inputGrid, start, end) {
+function greedy_best_first_search(
+  inputGrid,
+  start,
+  end,
+  heuristics = manhattan_h
+) {
   let grid = normalizeGrid(inputGrid);
   let startNode = grid[start.x][start.y];
   let openList = { [startNode.name]: startNode };
@@ -44,7 +51,7 @@ function dijkstra(inputGrid, start, end) {
     // get neighbour nodes
     let neighbours = getNeighbourNodes(grid, currentNode);
     let neighboursLength = neighbours.length;
-    // console.log("current: ", { x: currentNode.x, y: currentNode.y });
+    console.log("current: ", { x: currentNode.x, y: currentNode.y });
     for (let x = 0; x < neighboursLength; x++) {
       let neighbour = neighbours[x];
 
@@ -52,31 +59,38 @@ function dijkstra(inputGrid, start, end) {
       if (neighbour.closed || neighbour.isWall) {
         continue;
       }
-      let currentG = currentNode.g + neighbour.value;
-      let isBestG = false;
+      let currentH = heuristics(neighbour, end);
+      let isBestH = false;
       // for first time visiting, there is no previous g so current g will be the best
       if (!neighbour.visited) {
-        isBestG = true;
+        isBestH = true;
         neighbour.visited = true;
         openList[neighbour.name] = neighbour;
-      } else if (neighbour.g > currentG) {
+      } else if (neighbour.h > currentH) {
         // if visited and previous g is larger then the current one, current one will be the bset
-        isBestG = true;
+        isBestH = true;
       }
       // if current g is the best, update current neighbour's g,parent
-      if (isBestG) {
+      if (isBestH) {
         neighbour.parent = { x: currentNode.x, y: currentNode.y };
-        neighbour.g = currentG;
+        neighbour.h = currentH;
       }
-      // console.log({
-      //   x: neighbour.x,
-      //   y: neighbour.y,
-      //   g: neighbour.g,
-      // });
+      console.log({
+        x: neighbour.x,
+        y: neighbour.y,
+        h: neighbour.h,
+      });
     }
   }
   // return empty array if there is no path
   return [];
+}
+
+function manhattan_h(node, end) {
+  let D = 1;
+  let d1 = Math.abs(node.x - end.x);
+  let d2 = Math.abs(node.y - end.y);
+  return D * (d1 + d2);
 }
 
 function getFinalPath(node, grid, start) {
@@ -121,7 +135,7 @@ function getShortestNode(openList) {
   let shortest = null;
   for (let node in openList) {
     let isCurrentShortest =
-      shortest === null || openList[node].g < openList[shortest].g;
+      shortest === null || openList[node].h < openList[shortest].h;
     if (isCurrentShortest) {
       shortest = node;
     }
