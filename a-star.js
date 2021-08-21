@@ -1,12 +1,24 @@
-// 0 means obstacle, 1 means open
+// for different movement costs
+// eg. climbing a hill has higher cost than walking at downtown
+// 0 means obstacle, positive no. n means open and has cost of n
 let input = [
+  [1, 3, 1, 1, 0],
+  [1, 0, 1, 0, 1],
+  [1, 0, 1, 1, 1],
+  [1, 1, 1, 5, 1],
+  [0, 1, 1, 0, 1],
+];
+
+// for same movement costs
+let input_uniform = [
   [1, 1, 1, 1, 0],
   [1, 0, 1, 0, 1],
   [1, 1, 1, 1, 1],
   [1, 1, 1, 1, 1],
   [0, 1, 1, 0, 1],
 ];
-let start = { x: 1, y: 2 };
+
+let start = { x: 0, y: 0 };
 let end = { x: 4, y: 4 };
 
 // a-start idea is basically the same as dijkstra
@@ -41,7 +53,7 @@ function a_star(inputGrid, start, end, heuristics = manhattan_h) {
       if (neighbour.closed || neighbour.isWall) {
         continue;
       }
-      let currentG = currentNode.g + 1;
+      let currentG = currentNode.g + neighbour.value;
       let isBestG = false;
       // for first time visiting, there is no previous g so current g will be the best
       if (!neighbour.visited) {

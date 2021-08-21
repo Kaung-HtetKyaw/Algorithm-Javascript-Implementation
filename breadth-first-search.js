@@ -1,3 +1,4 @@
+// doesn't matter different or same movement costs, it won't check the costs anyway
 // 0 means obstacle, 1 means open
 let input_5_5 = [
   [1, 1, 1, 1, 0],
