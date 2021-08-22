@@ -2,7 +2,7 @@
 
 ## Bechmarks of pathfinding algorithms between Array and Binary Heap as Priority Queue
 
-> Following benchmarks are based on the open grids(grids with no obstacles)
+> Following benchmarks are based on travelling through open grids(grids with no obstacles) from 0x0 to WxH
 
 ### A\*
 
