@@ -4,28 +4,27 @@ const {
   getFinalPath,
   isEnd,
 } = require("./utils");
+const {
+  open_500_500,
+  open_100_100,
+  open_150_150,
+  open_250_250,
+} = require("../grids/no-obstacles-grids");
 // for different movement costs
 // eg. climbing a hill has higher cost than walking at downtown
 // 0 means obstacle, positive no. n means open and has cost of n
-// for uniform movement costs
-let input_uniform = [
-  [1, 1, 1, 1, 0],
-  [1, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1],
-  [1, 1, 1, 1, 1],
-  [0, 1, 1, 0, 1],
-];
 
 let start = { x: 0, y: 0 };
-let end = { x: 4, y: 4 };
+let end = { x: 99, y: 99 };
 
-// dijkstra idea is basically the same as breadth-first-search
-// except dijkstra includes priority queue, queued by the distance from the start node to current node in ascending order
+// let inputGrid = normalizeGrid(input);
+let inputGrid = normalizeGrid(open_100_100);
 
-// dijkstra uniform movement costs
-let inputGrid = normalizeGrid(input_uniform, true);
+// a-start idea is basically the same as dijkstra
+// except a-star is queued by,
+// heuristics to end node from current node + distacne from start to current node
 
-function dijkstra(grid, start, end) {
+function a_star(grid, start, end, heuristics = manhattan_h) {
   let startNode = grid[start.x][start.y];
   let openList = { [startNode.name]: startNode };
   let numNodes = 0; // num of nodes considered, not really important (for extra information)
@@ -47,7 +46,7 @@ function dijkstra(grid, start, end) {
     // get neighbour nodes
     let neighbours = getNeighbourNodes(grid, currentNode);
     let neighboursLength = neighbours.length;
-
+    // console.log("current: ", { x: currentNode.x, y: currentNode.y });
     for (let x = 0; x < neighboursLength; x++) {
       let neighbour = neighbours[x];
 
@@ -55,27 +54,21 @@ function dijkstra(grid, start, end) {
       if (neighbour.closed || neighbour.isWall) {
         continue;
       }
+      // cur to neighbour cost from start node
       let currentG = currentNode.g + currentNode.weights[neighbour.name];
-      let isBestG = false;
-      // for first time visiting, there is no previous g so current g will be the best
-      if (!neighbour.visited) {
-        isBestG = true;
+      let visited = neighbour.visited;
+      // for first time visiting or current g is smaller than the previous one
+      if (!visited || currentG < neighbour.g) {
         neighbour.visited = true;
-        openList[neighbour.name] = neighbour;
-      } else if (neighbour.g > currentG) {
-        // if visited and previous g is larger then the current one, current one will be the bset
-        isBestG = true;
-      }
-      // if current g is the best, update current neighbour's g,parent
-      if (isBestG) {
         neighbour.parent = { x: currentNode.x, y: currentNode.y };
+        neighbour.h = neighbour.h || heuristics(neighbour, end);
         neighbour.g = currentG;
+        neighbour.f = neighbour.g + neighbour.h;
+
+        if (!visited) {
+          openList[neighbour.name] = neighbour;
+        }
       }
-      // console.log({
-      //   x: neighbour.x,
-      //   y: neighbour.y,
-      //   g: neighbour.g,
-      // });
     }
   }
 
@@ -83,11 +76,18 @@ function dijkstra(grid, start, end) {
   return [];
 }
 
+function manhattan_h(node, end) {
+  let D = 1;
+  let d1 = Math.abs(node.x - end.x);
+  let d2 = Math.abs(node.y - end.y);
+  return D * (d1 + d2);
+}
+
 function getShortestNode(openList) {
   let shortest = null;
   for (let node in openList) {
     let isCurrentShortest =
-      shortest === null || openList[node].g < openList[shortest].g;
+      shortest === null || openList[node].f < openList[shortest].f;
     if (isCurrentShortest) {
       shortest = node;
     }
@@ -95,7 +95,10 @@ function getShortestNode(openList) {
   return openList[shortest];
 }
 
-// let result = dijkstra(inputGrid, start, end);
+console.time("A*");
+let result = a_star(inputGrid, start, end);
+console.log("Path Length: ", result.length);
+console.timeEnd("A*");
 // console.log("total costs: ", result[result.length - 1].g);
 // console.log(
 //   "nodes: ",
