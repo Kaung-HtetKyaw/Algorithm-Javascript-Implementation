@@ -4,19 +4,9 @@ const {
   getFinalPath,
   isEnd,
 } = require("./utils");
-const { input_50_50 } = require("./constants");
+const { open_100_100 } = require("../grids/no-obstacles-grids");
 
-// for different movement costs
-// eg. climbing a hill has higher cost than walking at downtown
 // 0 means obstacle, positive no. n means open and has cost of n
-// for uniform movement costs
-let input_uniform = [
-  [1, 1, 1, 1, 0],
-  [1, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1],
-  [1, 1, 1, 1, 1],
-  [0, 1, 1, 0, 1],
-];
 
 let start = { x: 0, y: 0 };
 let end = { x: 49, y: 49 };
@@ -25,7 +15,7 @@ let end = { x: 49, y: 49 };
 // except dijkstra includes priority queue, queued by the distance from the start node to current node in ascending order
 
 // dijkstra uniform movement costs
-let inputGrid = normalizeGrid(input_50_50);
+let inputGrid = normalizeGrid(open_100_100);
 
 function dijkstra(grid, start, end) {
   let startNode = grid[start.x][start.y];

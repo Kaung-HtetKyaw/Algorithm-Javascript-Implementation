@@ -4,12 +4,7 @@ const {
   getFinalPath,
   isEnd,
 } = require("./utils");
-const {
-  open_500_500,
-  open_100_100,
-  open_150_150,
-  open_250_250,
-} = require("../grids/no-obstacles-grids");
+const { open_100_100 } = require("../grids/no-obstacles-grids");
 
 // for different movement costs
 // eg. climbing a hill has higher cost than walking at downtown

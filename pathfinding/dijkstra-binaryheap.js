@@ -4,7 +4,7 @@ const {
   getFinalPath,
   isEnd,
 } = require("./utils");
-const { input_50_50 } = require("./constants");
+const { open_100_100 } = require("../grids/no-obstacles-grids");
 
 let start = { x: 0, y: 0 };
 let end = { x: 49, y: 49 };
@@ -14,7 +14,7 @@ let end = { x: 49, y: 49 };
 
 // this implementation uses Binary Heap for Priority Queue
 // !BinaryHeap Class required
-let inputGrid = normalizeGrid(input_50_50);
+let inputGrid = normalizeGrid(open_100_100);
 let priorityQueue = new BinaryHeap((x) => x?.g); // binary heap as priority queue
 
 function dijkstra(grid, start, end) {
