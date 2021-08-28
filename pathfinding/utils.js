@@ -64,7 +64,7 @@ exports.setCostsToNeighbours = (grid, currentNode, weighted = false) => {
   }
 };
 
-exports.getNeighbourNodes = (grid, currentNode) => {
+exports.getNeighbourNodes = (grid, currentNode, isDFS) => {
   let { x, y } = currentNode;
   let dirs = [
     [1, 0],
@@ -80,22 +80,14 @@ exports.getNeighbourNodes = (grid, currentNode) => {
     let neighbour = xGrid ? xGrid[y + dir[1]] : undefined;
 
     if (neighbour && !neighbour.isWall) {
-      result.push(neighbour);
+      if (isDFS) {
+        result.unshift(neighbour);
+      } else {
+        result.push(neighbour);
+      }
     }
   }
 
-  // if (grid[x - 1] && grid[x - 1][y] && !grid[x - 1][y].isWall) {
-  //   result.push(grid[x - 1][y]);
-  // }
-  // if (grid[x + 1] && grid[x + 1][y] && !grid[x + 1][y].isWall) {
-  //   result.push(grid[x + 1][y]);
-  // }
-  // if (grid[x][y - 1] && grid[x][y - 1] && !grid[x][y - 1].isWall) {
-  //   result.push(grid[x][y - 1]);
-  // }
-  // if (grid[x][y + 1] && grid[x][y + 1] && !grid[x][y + 1].isWall) {
-  //   result.push(grid[x][y + 1]);
-  // }
   return result;
 };
 
