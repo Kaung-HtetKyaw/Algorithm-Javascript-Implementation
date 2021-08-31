@@ -5,7 +5,7 @@ const {
   isEnd,
 } = require("./utils");
 const { open_100_100 } = require("../grids/no-obstacles-grids");
-const { BinaryHeap } = require("../DataStructure/BinaryHeap");
+const { BinomialHeap } = require("../DataStructure/BinomialHeap");
 
 let start = { x: 0, y: 0 };
 let end = { x: 49, y: 49 };
@@ -13,10 +13,22 @@ let end = { x: 49, y: 49 };
 // dijkstra idea is basically the same as breadth-first-search
 // except dijkstra includes priority queue, queued by the distance from the start node to current node in ascending order
 
-// this implementation uses Binary Heap for Priority Queue
-// !BinaryHeap Class required
+// this implementation uses Binomial Heap for Priority Queue
+// !BinomialHeap Class required
 let inputGrid = normalizeGrid(open_100_100);
-let priorityQueue = new BinaryHeap((x) => x?.g); // binary heap as priority queue
+let priorityQueue = new BinomialHeap("g", "name");
+
+// for (let i = 0; i < 100; i++) {
+//   for (let j = 0; j < 100; j++) {
+//     priorityQueue.push(inputGrid[i][j]);
+//   }
+// }
+// inputGrid[0][0].g = -1;
+// priorityQueue.decreaseKey(0, -1, inputGrid[0][0].name);
+// inputGrid[1][2].g = -2;
+// priorityQueue.decreaseKey(0, -2, inputGrid[1][2].name);
+
+// console.log(priorityQueue.pop());
 
 function dijkstra(grid, start, end) {
   let startNode = grid[start.x][start.y];
@@ -27,7 +39,7 @@ function dijkstra(grid, start, end) {
   while (openList.size() > 0) {
     // get the shortest node from open list
     let currentNode = openList.pop();
-
+    // console.log(currentNode);
     numNodes++;
 
     // if reach end
@@ -54,6 +66,7 @@ function dijkstra(grid, start, end) {
       let visited = neighbour.visited;
       // for first time visiting or current g is smaller than the previous one
       if (!visited || currentG < neighbour.g) {
+        let previousDistance = neighbour.g;
         neighbour.visited = true;
         neighbour.parent = { x: currentNode.x, y: currentNode.y };
         neighbour.g = currentG;
@@ -63,7 +76,7 @@ function dijkstra(grid, start, end) {
         } else {
           // already visited the node, but this time it got smaller g value than the previous one
           // so we need to reorder the node in priorityQueue
-          openList.reorderNode(neighbour);
+          openList.decreaseKey(previousDistance, neighbour.g, neighbour.name);
         }
       }
     }
@@ -83,3 +96,5 @@ console.timeEnd("Dijkstra");
 //   "nodes: ",
 //   result.map((el) => el.name)
 // );
+
+// console.log(priorityQueue.pop());

@@ -111,22 +111,4 @@ class BinaryHeap {
   }
 }
 
-// Binary Heap with items as objects
-let bheap = new BinaryHeap((x) => x?.g);
-let arr = [5, 3, 7, 2, 4, 6, 8];
-let objArr = arr.map((el) => ({ g: el }));
-objArr.forEach((el) => bheap.push(el));
-console.log(bheap.content);
-console.log(bheap.pop());
-console.log(bheap.content);
-console.log(bheap.remove({ g: 6 }));
-console.log(bheap.content);
-
-// Binary heap with items as simple integers
-let bheapInteger = new BinaryHeap((x) => x);
-arr.forEach((el) => bheapInteger.push(el));
-console.log(bheapInteger.content);
-console.log(bheapInteger.pop());
-console.log(bheapInteger.content);
-console.log(bheapInteger.remove(6));
-console.log(bheapInteger.content);
+exports.BinaryHeap = BinaryHeap;
